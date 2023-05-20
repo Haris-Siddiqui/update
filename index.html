@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Siddiqui Pharmacy</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+        @media (min-width: 768px) {
+            .navbar {
+                border-radius: none;
+            }
+        }
+
+        .navbar {
+            border-radius: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar bg-primary" style="border-radius: none;">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="index.html" style="color: white;">Siddiqui Pharmacy</a>
+            </div>
+            <p class="navbar-text navbar-right"><a href="#" style="color: white;" class="navbar-link">View All</a></p>
+        </div>
+    </nav>
+
+    <div class="container mb-3">
+        <form class="form" id="myForm">
+            <div class="row">
+                <div class="col col-sm-6">
+                    <div class="form-group">
+                        <label for="customer-name" class="form-label">Customer Name</label>
+                        <input type="text" id="customer-name" class="form-control">
+                    </div>
+                </div>
+                <div class="col col-sm-6">
+                    <div class="form-group">
+                        <label for="discount" class="form-label">Discount</label>
+                        <input type="number" onchange="updateTotal()" id="discount" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col col-sm-5">
+                    <div class="form-group">
+                        <label for="customer-name" class="form-label">Item name</label>
+                        <input type="text" id="item-name" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="form-group">
+                        <label for="price" class="form-label">Price</label>
+                        <input type="number" onchange="getPrice()" id="price" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="form-group">
+                        <label for="quantity" class="form-label">Quantity</label>
+                        <input type="number" onchange="getPrice()" id="quantity" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="form-group">
+                        <label for="total" class="form-label">Total</label>
+                        <input type="number" id="total" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="col col-sm-1">
+                    <div style="height: 74px; display: flex; align-items: center;">
+                        <button class="btn btn-primary" style="height: 50px; width: 50px;"><i
+                                class="fa fa-plus"></i></button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="container mb-3">
+        <div class="row">
+            <div class="col">
+                <button class="btn btn-primary" style="width: 100%">Print</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col col-xs-6 text-center">
+                        <h4>Sub Total</h4>
+                    </div>
+                    <div class="col col-xs-6 text-center">
+                        <h4><span id="sub-total"></span> PKR</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <table class="table table-responsive table-stripped table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>QTY</th>
+                    <th>Total</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody id="myTable">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const items = [];
+        document.getElementById('myForm').addEventListener("submit", function (event) {
+            event.preventDefault();
+            const title = document.getElementById('item-name').value;
+            const price = document.getElementById('price').value;
+            const quantity = document.getElementById('quantity').value;
+            items.push({ title, price, quantity });
+            document.getElementById('item-name').value = "";
+            document.getElementById('price').value = "";
+            document.getElementById('quantity').value = "";
+            document.getElementById('total').value = "";
+            generateTable();
+        });
+
+        const getPrice = () => {
+            document.getElementById('total').value = document.getElementById('price').value * document.getElementById('quantity').value;
+        }
+
+        const updateTotal = () => {
+            if (items.length > 0) {
+                let myTotal = 0;
+                items.map(item => {
+                    myTotal += parseFloat(document.getElementById('price').value) * parseFloat(document.getElementById('quantity').value);
+                })
+                document.getElementById("sub-total").innerHTML = myTotal - document.getElementById('discount').value;
+            } else {
+                document.getElementById("sub-total").innerHTML = 0;
+            }
+        }
+
+        const generateTable = () => {
+            let elem = "";
+            items.length > 0 ?
+                items.map((item, index) => {
+                    elem += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${item.title}</td>
+                    <td>${item.price}</td>
+                    <td><input class="form-control" style="width: 100px" type="number" id="price-custom-${index}" onchange="updateItemPrice(${index})" value="${item.quantity}" /></td>
+                    <td>${item.price * item.quantity}</td>
+                    <td><button class="btn btn-danger" onClick="deleteItem(${index})"><i class='fa fa-trash'></i></button></td>
+                </tr>
+                `
+                }) : elem = "<tr><td class='text-center' colspan='6'>No items found in cart!</td></tr>"
+            document.getElementById('myTable').innerHTML = elem;
+            updateTotal();
+        }
+
+        const updateItemPrice = (index) => {
+            items[index].quantity = document.getElementById(`price-custom-${index}`).value;
+            generateTable();
+        }
+
+        const deleteItem = (index) => {
+            items.splice(index, 1);
+            generateTable();
+        }
+
+        generateTable();
+    </script>
+
+</body>
+
+</html>
